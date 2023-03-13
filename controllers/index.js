@@ -49,8 +49,6 @@ export const deleteList = (req, res) => {
         Task.deleteMany({
             listId: removedListDoc._id
         }).then((t) => {
-            console.log(t);
-            console.log("Tasks from ", removedListDoc._id, " were deleted!");
         })
     }).catch(err => {
         res.status(404).send(err)
