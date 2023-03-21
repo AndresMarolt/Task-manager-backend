@@ -48,7 +48,6 @@ export const deleteList = (req, res) => {
         // DELETE ALL TASKS FROM THE DELETED LIST
         Task.deleteMany({
             listId: removedListDoc._id
-        }).then((t) => {
         })
     }).catch(err => {
         res.status(404).send(err)
@@ -234,7 +233,6 @@ export const deleteSession = (req, res) => {
             }
         }
     }).then(() => {
-        console.log("REMOVED SESSION");
         res.send();
     })
 }
