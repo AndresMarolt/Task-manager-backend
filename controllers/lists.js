@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import User from '../auth/index.js';
 import { List, Task } from '../models/index.js'
+
 
 export const getLists = (req, res) => {
     List.find({
@@ -160,79 +160,5 @@ export const getTasksFromList = (req, res) => {
         listId: listId
     }).then((task) => {
         res.send(task); 
-    })
-}
-
-
-// AUTH
-
-export const userSignUp = (req, res) => {
-    let body = req.body;
-
-    let newUser = new User(body);
-    
-    newUser.save().then(() => {
-        return newUser.createSession();
-    }).then((refreshToken) => {
-        // SESSION CREATE SUCCESSFULLY - REFRESH TOKEN RETURNED.
-        // NOW WE GENERATE AN ACCESS AUTH TOKEN FOR THE USER
-        return newUser.generateAccessAuthToken().then((accessToken) => {
-            return {accessToken, refreshToken};
-        }).then((authTokens) => {
-            // NOW WE CONSTRUCT AND SEND THE RESPONSE TO THE USER WITH THEIR AUTH TOKENS IN THE HEADER AND THE USER OBJECT IN THE BODY
-            res
-                .header('x-refresh-token', authTokens.refreshToken)           
-                .header('x-access-token', authTokens.accessToken)
-                .send(newUser);
-        })
-    }).catch((err) => {
-        res.status(400).send(err);
-    })
-}
-
-export const userLogIn = (req, res) => {
-    let email = req.body.email;
-    let password = req.body.password;
-
-    User.findByCredentials(email, password).then((user) => {
-        return user.createSession().then((refreshToken) => {
-            return user.generateAccessAuthToken().then((accessToken) => {
-                return {accessToken, refreshToken}
-            })
-        }).then((authTokens) => {
-            res
-                .header('x-refresh-token', authTokens.refreshToken)           
-                .header('x-access-token', authTokens.accessToken)
-                .send(user);
-        }).catch((err) => {
-            res.status(400).send(err);
-        })
-    }).catch((err) => {
-        res.status(400).send(err);
-    })
-}
-
-export const getAccessToken = (req, res) => {
-    req.userObject.generateAccessAuthToken().then((accessToken) => {
-        res.header('x-access-token', accessToken).send({ accessToken });
-    }).catch(err => {
-        res.status(400).send(err);
-    })
-}
-
-export const deleteSession = (req, res) => {
-    let userId = req.user_id;
-    let refreshToken = req.refreshToken;
-
-    User.findOneAndUpdate({
-        _id: userId
-    },{
-        $pull: {
-            sessions: {
-                token: refreshToken
-            }
-        }
-    }).then(() => {
-        res.send();
     })
 }
